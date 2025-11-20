@@ -43,9 +43,7 @@ export const resolvers = {
     },
   },
 
-  // ========================
-  //        MUTATION
-  // ========================
+
   Mutation: {
     // addProduct(name, price)
     addProduct: async (_, { name, price }) => {
