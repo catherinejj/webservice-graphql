@@ -1,36 +1,87 @@
-//import { products,users } from './typeDefs.js';
+import { supabase } from "./supabaseClient.js";
 
-//equivalent des posts
 export const resolvers = {
-  Query : {
-  products:() => products,
-  product:(_, {id}) => 
-    products.find(p => p.id === id),
-  users:() => users,
-  user:() => users.find(u => u.id === id),
-},
+  Query: {
+    products: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*");
 
-  Mutation : {
-    //mutation
-    addProduct:(_, {name,price}) => {
-      const newProduct = { id:productId + 1, name:"chemise",price:49.99};
-      prodcuts.push('newProduct');
-      return newProduct;
+      if (error) throw new Error(error.message);
+      return data;
     },
-    //mutation ajoute produit dans panier de user
-    addToCart: (_, { userId, productId }) => {
-      const user = users.find(u => u.id === userId);
-      const product = products.find(p => p.id === productId);
 
-      user.cart.push(product)
-    
+    product: async (_, { id }) => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
     },
-      
-    changePrice:(_, { id, price }) => {
-      const product = products.find(p => p.id == id);
-      if (!product) throw new Error("Product not found.");
-      product.price = price;
-      return product;
+
+    users: async () => {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*");
+
+      if (error) throw new Error(error.message);
+      return data;
+    },
+
+    user: async (_, { id }) => {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
+    },
+  },
+
+  // ========================
+  //        MUTATION
+  // ========================
+  Mutation: {
+    // addProduct(name, price)
+    addProduct: async (_, { name, price }) => {
+      const { data, error } = await supabase
+        .from("products")
+        .insert([{ name, price }])
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
+    },
+
+    // addToCart(userId, productId)
+    addToCart: async (_, { userId, productId }) => {
+      const { data, error } = await supabase
+        .from("carts")
+        .insert([{ user_id: userId, product_id: productId }])
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
+    },
+
+    // changePrice(id, price)
+    changePrice: async (_, { id, price }) => {
+      const { data, error } = await supabase
+        .from("products")
+        .update({ price })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw new Error(error.message);
+      return data;
     },
   },
 };
